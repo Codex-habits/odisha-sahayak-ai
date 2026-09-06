@@ -25,13 +25,13 @@ st.subheader("Predict. Detect. Respond.")
 
 st.write(
     "AI-powered disaster assistance platform designed "
-    "to support flood and waterlogging response in Odisha."
+    "to support flood and emergency response in Odisha."
 )
 
 st.divider()
 
 # -----------------------------
-# Dashboard metrics
+# Dashboard
 # -----------------------------
 col1, col2, col3 = st.columns(3)
 
@@ -54,22 +54,13 @@ st.header("🧠 AI Flood Risk Prediction")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    rainfall = st.slider(
-        "Rainfall (mm)",
-        0, 500, 100
-    )
+    rainfall = st.slider("Rainfall (mm)", 0, 500, 100)
 
 with col2:
-    humidity = st.slider(
-        "Humidity (%)",
-        0, 100, 70
-    )
+    humidity = st.slider("Humidity (%)", 0, 100, 70)
 
 with col3:
-    water_level = st.slider(
-        "Water Level",
-        0, 10, 3
-    )
+    water_level = st.slider("Water Level", 0, 10, 3)
 
 if st.button("🔍 Analyze Risk"):
 
@@ -82,7 +73,6 @@ if st.button("🔍 Analyze Risk"):
     prediction = model.predict(input_data)[0]
     probability = model.predict_proba(input_data)[0][1]
 
-    st.divider()
     st.subheader("📊 AI Assessment")
 
     if prediction == 1:
@@ -96,8 +86,8 @@ if st.button("🔍 Analyze Risk"):
     )
 
     st.caption(
-        "Prototype model: prediction should be validated "
-        "with real local observations before operational use."
+        "Prototype model. Predictions should be validated "
+        "with real local observations."
     )
 
 # -----------------------------
@@ -122,20 +112,21 @@ if uploaded_file:
     if st.button("🔍 Analyze Image"):
 
         st.warning(
-            "⚠️ Computer-vision model is currently in prototype stage."
+            "⚠️ Computer-vision model is currently "
+            "in prototype stage."
         )
 
         st.write("### 📋 Preliminary Assessment")
 
         st.write(
-            "The image has been received successfully. "
-            "A trained flood-image model will classify "
+            "Image received successfully. A trained "
+            "computer-vision model will classify "
             "waterlogging severity in the next stage."
         )
 
         st.info(
-            "Recommended action: verify the location and "
-            "avoid entering moving or unknown-depth floodwater."
+            "Recommended action: avoid moving or "
+            "unknown-depth floodwater."
         )
 
 # -----------------------------
@@ -153,30 +144,148 @@ if question:
 
     text = question.lower()
 
-    # Flood / waterlogging detection
+    # Keywords
     flood_words = [
         "pani", "water", "flood", "banya",
         "ban", "waterlogging", "duba",
-        "flooded"
+        "flooded", "paani", "ପାଣି", "ବନ୍ୟା"
+    ]
+
+    danger_words = [
+        "trapped", "stuck", "ataki",
+        "danger", "dangerous",
+        "rescue", "bachao",
+        "drowning", "dubu", "dubi"
+    ]
+
+    damage_words = [
+        "damaged", "damage", "damaged house",
+        "ghara damaged", "house damaged",
+        "collapse", "collapsed", "bhangi",
+        "ଭାଙ୍ଗି", "ଘର ଭାଙ୍ଗି"
     ]
 
     medical_words = [
         "injury", "injured", "medical",
-        "ambulance", "bleeding"
+        "ambulance", "bleeding",
+        "hospital", "doctor", "injured person"
     ]
 
-    if any(word in text for word in medical_words):
+    fire_words = [
+        "fire", "agni", "agni lagichi",
+        "ଅଗ୍ନି", "ନିଆଁ", "fire lagichi"
+    ]
+
+    earthquake_words = [
+        "earthquake", "bhukampa",
+        "ଭୂକମ୍ପ", "tremor"
+    ]
+
+    road_words = [
+        "road blocked", "roadblock",
+        "road blockage", "rasta blocked",
+        "rasta band", "road band"
+    ]
+
+    # CRITICAL: Person trapped / drowning
+    if any(word in text for word in danger_words):
+
+        st.error("🚨 CRITICAL PRIORITY — PERSON IN DANGER")
+
+        st.write("### 🛟 Immediate Actions")
+
+        st.write(
+            "• Move to a safe location if you can do so safely."
+        )
+
+        st.write(
+            "• Do not enter deep or fast-moving water to rescue someone."
+        )
+
+        st.write(
+            "• Contact appropriate local emergency services immediately."
+        )
+
+        st.write("### 📝 Situation Classification")
+        st.write("**Type:** Person in Danger")
+        st.write("**Priority:** Critical")
+
+    # Medical emergency
+    elif any(word in text for word in medical_words):
 
         st.error("🔴 HIGH PRIORITY — MEDICAL EMERGENCY")
 
         st.write("### 🛟 Recommended Actions")
-        st.write("• Move to a safe location if possible.")
-        st.write("• Seek immediate medical assistance.")
-        st.write("• Contact appropriate local emergency services.")
 
-    elif any(word in text for word in flood_words):
+        st.write(
+            "• Seek immediate medical assistance."
+        )
 
-        st.error("🔴 HIGH PRIORITY — FLOOD / WATERLOGGING")
+        st.write(
+            "• Move to a safe location if possible."
+        )
+
+        st.write(
+            "• Contact appropriate local emergency services."
+        )
+
+        st.write("### 📝 Situation Classification")
+        st.write("**Type:** Medical Emergency")
+        st.write("**Priority:** High")
+
+    # Fire
+    elif any(word in text for word in fire_words):
+
+        st.error("🔴 HIGH PRIORITY — FIRE EMERGENCY")
+
+        st.write("### 🛟 Recommended Actions")
+
+        st.write(
+            "• Move away from the fire and smoke."
+        )
+
+        st.write(
+            "• Do not re-enter the affected building."
+        )
+
+        st.write(
+            "• Contact the appropriate emergency services."
+        )
+
+        st.write("### 📝 Situation Classification")
+        st.write("**Type:** Fire")
+        st.write("**Priority:** High")
+
+    # Earthquake
+    elif any(word in text for word in earthquake_words):
+
+        st.error("🔴 HIGH PRIORITY — EARTHQUAKE")
+
+        st.write("### 🛟 Recommended Actions")
+
+        st.write(
+            "• Move away from damaged buildings and structures."
+        )
+
+        st.write(
+            "• Watch for falling objects and damaged electrical lines."
+        )
+
+        st.write(
+            "• Follow official instructions and seek emergency help if needed."
+        )
+
+        st.write("### 📝 Situation Classification")
+        st.write("**Type:** Earthquake")
+        st.write("**Priority:** High")
+
+    # Flood + serious damage
+    elif (
+        any(word in text for word in flood_words)
+        and any(word in text for word in damage_words)
+    ):
+
+        st.error("🔴 HIGH PRIORITY — FLOOD + DAMAGE")
 
         st.write("### 🛟 Recommended Actions")
 
@@ -185,12 +294,11 @@ if question:
         )
 
         st.write(
-            "• Avoid walking or driving through moving floodwater."
+            "• Avoid damaged buildings and unsafe structures."
         )
 
         st.write(
-            "• Stay away from electrical equipment "
-            "and damaged power lines."
+            "• Stay away from electrical equipment and damaged power lines."
         )
 
         st.write(
@@ -198,19 +306,72 @@ if question:
         )
 
         st.write("### 📝 Situation Classification")
-        st.write("**Type:** Flood / Waterlogging")
+        st.write("**Type:** Flood + Infrastructure Damage")
         st.write("**Priority:** High")
 
-    else:
+    # Flood / waterlogging
+    elif any(word in text for word in flood_words):
 
-        st.info("🟡 MEDIUM PRIORITY — INFORMATION REQUIRED")
+        st.warning("🟠 MEDIUM PRIORITY — FLOOD / WATERLOGGING")
+
+        st.write("### 🛟 Recommended Actions")
 
         st.write(
-            "Please provide more details such as your "
-            "situation, water level, location type, or emergency."
+            "• Move to a safe location if water is rising."
+        )
+
+        st.write(
+            "• Avoid walking or driving through moving floodwater."
+        )
+
+        st.write(
+            "• Stay away from electrical equipment and damaged power lines."
+        )
+
+        st.write(
+            "• Follow local authority instructions."
+        )
+
+        st.write("### 📝 Situation Classification")
+        st.write("**Type:** Flood / Waterlogging")
+        st.write("**Priority:** Medium")
+
+    # Road blockage
+    elif any(word in text for word in road_words):
+
+        st.warning("🟠 MEDIUM PRIORITY — ROAD BLOCKAGE")
+
+        st.write("### 🛟 Recommended Actions")
+
+        st.write(
+            "• Avoid the blocked route."
+        )
+
+        st.write(
+            "• Use an alternative safe route if available."
+        )
+
+        st.write(
+            "• Report the obstruction to the appropriate local authority."
+        )
+
+        st.write("### 📝 Situation Classification")
+        st.write("**Type:** Road Blockage")
+        st.write("**Priority:** Medium")
+
+    # Unknown situation
+    else:
+
+        st.info("🟡 INFORMATION REQUIRED")
+
+        st.write(
+            "Please provide more details about the emergency, "
+            "such as flooding, injury, fire, earthquake, "
+            "road blockage, or a person in danger."
         )
 
 st.caption(
     "Odisha Sahayak AI — Hackathon Prototype | "
-    "AI predictions are decision-support estimates, not official warnings."
+    "AI predictions are decision-support estimates, "
+    "not official warnings."
 )
