@@ -142,38 +142,41 @@ question = st.text_input(
 
 if question:
 
-    text = question.lower()
+    text = question.lower().strip()
 
-    # Keywords
     flood_words = [
-        "pani", "water", "flood", "banya",
-        "ban", "waterlogging", "duba",
-        "flooded", "paani", "ପାଣି", "ବନ୍ୟା"
+        "pani", "paani", "water", "flood",
+        "banya", "ban", "waterlogging",
+        "duba", "flooded", "ପାଣି", "ବନ୍ୟା"
     ]
 
     danger_words = [
         "trapped", "stuck", "ataki",
-        "danger", "dangerous",
-        "rescue", "bachao",
-        "drowning", "dubu", "dubi"
+        "danger", "dangerous", "rescue",
+        "bachao", "drowning", "dubu", "dubi"
     ]
 
     damage_words = [
-        "damaged", "damage", "damaged house",
-        "ghara damaged", "house damaged",
-        "collapse", "collapsed", "bhangi",
-        "ଭାଙ୍ଗି", "ଘର ଭାଙ୍ଗି"
+        "damage",
+        "damaged",
+        "ghara",
+        "house",
+        "collapse",
+        "collapsed",
+        "bhangi",
+        "ଭାଙ୍ଗି",
+        "ଘର"
     ]
 
     medical_words = [
         "injury", "injured", "medical",
         "ambulance", "bleeding",
-        "hospital", "doctor", "injured person"
+        "hospital", "doctor"
     ]
 
     fire_words = [
-        "fire", "agni", "agni lagichi",
-        "ଅଗ୍ନି", "ନିଆଁ", "fire lagichi"
+        "fire", "agni",
+        "ନିଆଁ", "ଅଗ୍ନି"
     ]
 
     earthquake_words = [
@@ -182,194 +185,122 @@ if question:
     ]
 
     road_words = [
-        "road blocked", "roadblock",
-        "road blockage", "rasta blocked",
-        "rasta band", "road band"
+        "road blocked",
+        "roadblock",
+        "road blockage",
+        "rasta blocked",
+        "rasta band",
+        "road band"
     ]
 
-    # CRITICAL: Person trapped / drowning
+    # CRITICAL
     if any(word in text for word in danger_words):
 
-        st.error("🚨 CRITICAL PRIORITY — PERSON IN DANGER")
+        st.error("🚨 CRITICAL PRIORITY — IMMEDIATE DANGER")
 
-        st.write("### 🛟 Immediate Actions")
-
-        st.write(
-            "• Move to a safe location if you can do so safely."
-        )
-
-        st.write(
-            "• Do not enter deep or fast-moving water to rescue someone."
-        )
-
-        st.write(
-            "• Contact appropriate local emergency services immediately."
-        )
+        st.write("### 🛟 Recommended Actions")
+        st.write("• Move to a safe location if possible.")
+        st.write("• Seek immediate rescue assistance.")
+        st.write("• Follow local authority instructions.")
 
         st.write("### 📝 Situation Classification")
-        st.write("**Type:** Person in Danger")
+        st.write("**Type:** Immediate Danger / Rescue")
         st.write("**Priority:** Critical")
 
-    # Medical emergency
+    # MEDICAL
     elif any(word in text for word in medical_words):
 
         st.error("🔴 HIGH PRIORITY — MEDICAL EMERGENCY")
 
         st.write("### 🛟 Recommended Actions")
-
-        st.write(
-            "• Seek immediate medical assistance."
-        )
-
-        st.write(
-            "• Move to a safe location if possible."
-        )
-
-        st.write(
-            "• Contact appropriate local emergency services."
-        )
+        st.write("• Move to a safe location.")
+        st.write("• Seek immediate medical assistance.")
+        st.write("• Contact appropriate local emergency services.")
 
         st.write("### 📝 Situation Classification")
         st.write("**Type:** Medical Emergency")
         st.write("**Priority:** High")
 
-    # Fire
+    # FIRE
     elif any(word in text for word in fire_words):
 
         st.error("🔴 HIGH PRIORITY — FIRE EMERGENCY")
 
         st.write("### 🛟 Recommended Actions")
-
-        st.write(
-            "• Move away from the fire and smoke."
-        )
-
-        st.write(
-            "• Do not re-enter the affected building."
-        )
-
-        st.write(
-            "• Contact the appropriate emergency services."
-        )
+        st.write("• Move away from fire and smoke.")
+        st.write("• Do not enter an unsafe building.")
+        st.write("• Seek emergency assistance.")
 
         st.write("### 📝 Situation Classification")
         st.write("**Type:** Fire")
         st.write("**Priority:** High")
 
-    # Earthquake
+    # EARTHQUAKE
     elif any(word in text for word in earthquake_words):
 
         st.error("🔴 HIGH PRIORITY — EARTHQUAKE")
 
         st.write("### 🛟 Recommended Actions")
-
-        st.write(
-            "• Move away from damaged buildings and structures."
-        )
-
-        st.write(
-            "• Watch for falling objects and damaged electrical lines."
-        )
-
-        st.write(
-            "• Follow official instructions and seek emergency help if needed."
-        )
+        st.write("• Move to a safe open area if possible.")
+        st.write("• Stay away from damaged buildings.")
+        st.write("• Follow local authority instructions.")
 
         st.write("### 📝 Situation Classification")
         st.write("**Type:** Earthquake")
         st.write("**Priority:** High")
 
-    # Flood + serious damage
-    elif (
-        any(word in text for word in flood_words)
-        and any(word in text for word in damage_words)
-    ):
+    # DAMAGE
+    elif any(word in text for word in damage_words):
 
-        st.error("🔴 HIGH PRIORITY — FLOOD + DAMAGE")
+        st.error("🔴 HIGH PRIORITY — STRUCTURAL DAMAGE")
 
         st.write("### 🛟 Recommended Actions")
-
-        st.write(
-            "• Move to a safe or elevated location."
-        )
-
-        st.write(
-            "• Avoid damaged buildings and unsafe structures."
-        )
-
-        st.write(
-            "• Stay away from electrical equipment and damaged power lines."
-        )
-
-        st.write(
-            "• Follow instructions from local authorities."
-        )
+        st.write("• Stay away from damaged or unstable buildings.")
+        st.write("• Do not enter a damaged structure.")
+        st.write("• Move to a safe open area if possible.")
+        st.write("• Report the damage to local authorities.")
 
         st.write("### 📝 Situation Classification")
-        st.write("**Type:** Flood + Infrastructure Damage")
+        st.write("**Type:** Structural / Property Damage")
         st.write("**Priority:** High")
 
-    # Flood / waterlogging
+    # FLOOD
     elif any(word in text for word in flood_words):
 
         st.warning("🟠 MEDIUM PRIORITY — FLOOD / WATERLOGGING")
 
         st.write("### 🛟 Recommended Actions")
-
-        st.write(
-            "• Move to a safe location if water is rising."
-        )
-
-        st.write(
-            "• Avoid walking or driving through moving floodwater."
-        )
-
-        st.write(
-            "• Stay away from electrical equipment and damaged power lines."
-        )
-
-        st.write(
-            "• Follow local authority instructions."
-        )
+        st.write("• Move to a safe or elevated location.")
+        st.write("• Avoid moving or unknown-depth floodwater.")
+        st.write("• Follow local authority instructions.")
 
         st.write("### 📝 Situation Classification")
         st.write("**Type:** Flood / Waterlogging")
         st.write("**Priority:** Medium")
 
-    # Road blockage
+    # ROAD BLOCK
     elif any(word in text for word in road_words):
 
         st.warning("🟠 MEDIUM PRIORITY — ROAD BLOCKAGE")
 
         st.write("### 🛟 Recommended Actions")
-
-        st.write(
-            "• Avoid the blocked route."
-        )
-
-        st.write(
-            "• Use an alternative safe route if available."
-        )
-
-        st.write(
-            "• Report the obstruction to the appropriate local authority."
-        )
+        st.write("• Avoid the blocked route.")
+        st.write("• Use an alternative safe route if available.")
+        st.write("• Report the blockage.")
 
         st.write("### 📝 Situation Classification")
         st.write("**Type:** Road Blockage")
         st.write("**Priority:** Medium")
 
-    # Unknown situation
+    # UNKNOWN
     else:
 
         st.info("🟡 INFORMATION REQUIRED")
 
         st.write(
-            "Please provide more details about the emergency, "
-            "such as flooding, injury, fire, earthquake, "
-            "road blockage, or a person in danger."
+            "Please provide more details such as your "
+            "situation, location, or emergency."
         )
-
 st.caption(
     "Odisha Sahayak AI — Hackathon Prototype | "
     "AI predictions are decision-support estimates, "
