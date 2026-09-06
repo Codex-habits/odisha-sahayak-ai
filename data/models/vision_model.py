@@ -4,10 +4,14 @@ import numpy as np
 
 def analyze_flood_image(image):
     """
-    Prototype computer-vision assessment.
+    Prototype visual assessment.
 
-    This analyzes simple visual characteristics of the image.
-    It is NOT a trained flood classifier.
+    This separates the result into:
+    - Flood/waterlogging indication
+    - No obvious flood indication
+    - Uncertain
+
+    It is NOT a trained flood-detection model.
     """
 
     image = image.convert("RGB")
@@ -15,25 +19,56 @@ def analyze_flood_image(image):
 
     pixels = np.array(image).astype(float)
 
-    # Average brightness
     brightness = pixels.mean()
 
-    # Blue-channel dominance
-    blue = pixels[:, :, 2].mean()
     red = pixels[:, :, 0].mean()
+    green = pixels[:, :, 1].mean()
+    blue = pixels[:, :, 2].mean()
 
-    blue_ratio = blue - red
+    blue_signal = blue - red
 
-    # Prototype visual assessment
-    if brightness < 70 and blue_ratio > 5:
+    # Prototype visual signals
+    possible_water = (
+        blue_signal > 8
+        and brightness < 150
+    )
+
+    strong_water_signal = (
+        blue_signal > 15
+        and brightness < 100
+    )
+
+    if strong_water_signal:
+
+        flood_detected = True
         severity = "HIGH"
-    elif brightness < 120 or blue_ratio > 8:
+        assessment = (
+            "Strong visual signals may indicate "
+            "possible waterlogging."
+        )
+
+    elif possible_water:
+
+        flood_detected = True
         severity = "MEDIUM"
+        assessment = (
+            "Some visual signals may indicate "
+            "possible waterlogging."
+        )
+
     else:
+
+        flood_detected = False
         severity = "LOW"
+        assessment = (
+            "No strong visual evidence of waterlogging "
+            "was detected by this prototype."
+        )
 
     return {
+        "flood_detected": flood_detected,
         "severity": severity,
+        "assessment": assessment,
         "brightness": round(float(brightness), 2),
-        "blue_signal": round(float(blue_ratio), 2)
+        "blue_signal": round(float(blue_signal), 2)
     }
