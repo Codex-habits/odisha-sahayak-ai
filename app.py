@@ -3,8 +3,9 @@ import pickle
 import pandas as pd
 from pathlib import Path
 from PIL import image
-from data.models.visions_models
+from data.models.vision_model
 import analyze_flood_image
+
 
 
 st.set_page_config(
