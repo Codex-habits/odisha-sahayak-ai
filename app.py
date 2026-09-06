@@ -2,8 +2,10 @@ import streamlit as st
 import pickle
 import pandas as pd
 from pathlib import Path
+from PIL import image
 from data.models.visions_models
 import analyze_flood_image
+
 
 st.set_page_config(
     page_title="Odisha Sahayak AI",
@@ -91,13 +93,13 @@ if st.button("🔍 Analyze Risk"):
         "Prototype model. Predictions should be validated "
         "with real local observations."
     )
-    # --------------------------------------------------
+# --------------------------------------------------
 # FLOOD IMAGE ANALYSIS
 # --------------------------------------------------
 
 st.divider()
 
-st.header("📷 Flood Image Analysis")
+st.header("📷 AI Flood Image Analysis")
 
 st.write(
     "Upload a road or area image for preliminary "
@@ -111,45 +113,56 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file:
 
+    image = Image.open(uploaded_file)
+
     st.image(
-        uploaded_file,
+        image,
         caption="Uploaded Area Image",
         use_container_width=True
     )
 
     if st.button("🔍 Analyze Image", key="image_analysis"):
 
-        st.subheader("📊 Preliminary Visual Assessment")
+        result = analyze_flood_image(image)
 
-        st.info(
-            "Image received successfully. "
-            "The uploaded image is ready for computer-vision analysis."
+        severity = result["severity"]
+
+        st.subheader("📊 Vision Assessment")
+
+        if severity == "HIGH":
+            st.error("🔴 HIGH WATERLOGGING INDICATION")
+
+        elif severity == "MEDIUM":
+            st.warning("🟠 MEDIUM WATERLOGGING INDICATION")
+
+        else:
+            st.success("🟢 LOW WATERLOGGING INDICATION")
+
+        st.write("### 🔎 Visual Analysis")
+
+        st.write(
+            f"**Brightness signal:** "
+            f"{result['brightness']}"
         )
 
-        st.write("### 🚧 Current Assessment")
-
-        st.write("**Image Status:** Successfully received")
-        st.write("**Analysis Mode:** Vision Prototype")
-        st.write("**Location:** Not provided")
-
-        st.warning(
-            "⚠️ This prototype does not yet use a trained "
-            "computer-vision model. The result should not be "
-            "treated as an official flood warning."
+        st.write(
+            f"**Blue-channel signal:** "
+            f"{result['blue_signal']}"
         )
 
         st.write("### 🛟 Safety Recommendation")
 
-        st.write(
-            "• Avoid moving or unknown-depth floodwater."
-        )
-        st.write(
-            "• Stay away from damaged roads and electrical hazards."
-        )
-        st.write(
-            "• Follow instructions from local authorities."
+        st.info(
+            "Avoid moving or unknown-depth floodwater. "
+            "Verify the situation locally and follow "
+            "instructions from authorities."
         )
 
+        st.caption(
+            "Prototype computer-vision assessment — "
+            "not an official flood warning or validated "
+            "flood-severity measurement."
+        )
 
 
 # -----------------------------
