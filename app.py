@@ -84,7 +84,7 @@ if st.button("🔍 Analyze Risk"):
 
 st.divider()
 
-st.header("📷 Flood Image Analysis")
+st.header("📷 AI Flood Image Analysis")
 
 uploaded_file = st.file_uploader(
     "Upload a road/area image",
@@ -92,16 +92,31 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file:
+
     st.image(
         uploaded_file,
         caption="Uploaded image",
         use_container_width=True
     )
 
-    st.info(
-        "Computer Vision module will analyze "
-        "waterlogging severity in the next stage."
-    )
+    if st.button("🔍 Analyze Image"):
+
+        st.info("Analyzing image...")
+
+        # Prototype image-analysis stage
+        # A trained computer-vision model will be connected here.
+        
+        st.warning(
+            "⚠️ Prototype analysis: "
+            "A trained flood-image dataset/model is required "
+            "for reliable waterlogging detection."
+        )
+
+        st.write("📌 Suggested next action:")
+        st.write(
+            "Collect the location and report the image "
+            "to the disaster-response system."
+        )
 
 st.divider()
 
