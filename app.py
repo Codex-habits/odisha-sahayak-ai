@@ -1,10 +1,19 @@
 import streamlit as st
+import pickle
+import pandas as pd
+from pathlib import Path
 
 st.set_page_config(
     page_title="Odisha Sahayak AI",
     page_icon="🌊",
     layout="wide"
 )
+
+# Load trained ML model
+MODEL_PATH = Path("data/models/flood_risk_model.pkl")
+
+with open(MODEL_PATH, "rb") as file:
+    model = pickle.load(file)
 
 st.title("🌊 Odisha Sahayak AI")
 st.subheader("Predict. Detect. Respond.")
@@ -19,40 +28,66 @@ st.divider()
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Risk Level", "MEDIUM")
-    
+    st.metric("AI Model", "Random Forest")
+
 with col2:
     st.metric("Reports Today", "24")
-    
+
 with col3:
     st.metric("Areas Monitored", "12")
 
 st.divider()
 
-st.header("📊 Flood Risk Assessment")
+st.header("🧠 AI Flood Risk Prediction")
 
-rainfall = st.slider(
-    "Rainfall (mm)",
-    min_value=0,
-    max_value=500,
-    value=100
-)
+col1, col2, col3 = st.columns(3)
 
-if rainfall < 100:
-    risk = "🟢 LOW RISK"
-elif rainfall < 200:
-    risk = "🟡 MEDIUM RISK"
-else:
-    risk = "🔴 HIGH RISK"
+with col1:
+    rainfall = st.slider(
+        "Rainfall (mm)",
+        0, 500, 100
+    )
 
-st.subheader(f"AI Risk Assessment: {risk}")
+with col2:
+    humidity = st.slider(
+        "Humidity (%)",
+        0, 100, 70
+    )
+
+with col3:
+    water_level = st.slider(
+        "Water Level",
+        0, 10, 3
+    )
+
+if st.button("🔍 Analyze Risk"):
+
+    input_data = pd.DataFrame({
+        "rainfall": [rainfall],
+        "humidity": [humidity],
+        "water_level": [water_level]
+    })
+
+    prediction = model.predict(input_data)[0]
+
+    probability = model.predict_proba(input_data)[0][1]
+
+    if prediction == 1:
+        st.error("🔴 HIGH FLOOD RISK")
+    else:
+        st.success("🟢 LOW FLOOD RISK")
+
+    st.metric(
+        "AI Flood Probability",
+        f"{probability * 100:.1f}%"
+    )
 
 st.divider()
 
 st.header("📷 Flood Image Analysis")
 
 uploaded_file = st.file_uploader(
-    "Upload an image of a road/area",
+    "Upload a road/area image",
     type=["jpg", "jpeg", "png"]
 )
 
@@ -64,20 +99,25 @@ if uploaded_file:
     )
 
     st.info(
-        "Image received. Computer Vision analysis "
-        "will be integrated in the next module."
+        "Computer Vision module will analyze "
+        "waterlogging severity in the next stage."
     )
 
 st.divider()
 
 st.header("🤖 Odia Emergency Assistant")
 
-user_question = st.text_input(
+question = st.text_input(
     "Ask your emergency question:"
 )
 
-if user_question:
-    st.write("ପରିସ୍ଥିତି ଅନୁଯାୟୀ ସୁରକ୍ଷିତ ସ୍ଥାନକୁ ଯାଆନ୍ତୁ।")
+if question:
+    st.info(
+        "ଦୟାକରି ସୁରକ୍ଷିତ ସ୍ଥାନକୁ ଯାଆନ୍ତୁ ଏବଂ "
+        "ବନ୍ୟା ପାଣିରେ ପ୍ରବେଶ କରନ୍ତୁ ନାହିଁ।"
+    )
+
     st.write(
-        "For emergencies, contact the appropriate local emergency services."
+        "For immediate emergencies, contact appropriate "
+        "local emergency services."
     )
