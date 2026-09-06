@@ -3,8 +3,7 @@ import pickle
 import pandas as pd
 from pathlib import Path
 from PIL import Image
-from data.models.vision_model
-import analyze_flood_image
+from data.models.vision_model import analyze_flood_image
 
 
 
