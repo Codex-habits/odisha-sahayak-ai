@@ -89,15 +89,21 @@ if st.button("🔍 Analyze Risk"):
         "Prototype model. Predictions should be validated "
         "with real local observations."
     )
+    # --------------------------------------------------
+# FLOOD IMAGE ANALYSIS
+# --------------------------------------------------
 
-# -----------------------------
-# Image Analysis
-# -----------------------------
 st.divider()
-st.header("📷 AI Flood Image Analysis")
+
+st.header("📷 Flood Image Analysis")
+
+st.write(
+    "Upload a road or area image for preliminary "
+    "waterlogging assessment."
+)
 
 uploaded_file = st.file_uploader(
-    "Upload a road/area image",
+    "📤 Upload flood/road image",
     type=["jpg", "jpeg", "png"]
 )
 
@@ -105,29 +111,44 @@ if uploaded_file:
 
     st.image(
         uploaded_file,
-        caption="Uploaded image",
+        caption="Uploaded Area Image",
         use_container_width=True
     )
 
-    if st.button("🔍 Analyze Image"):
+    if st.button("🔍 Analyze Image", key="image_analysis"):
 
-        st.warning(
-            "⚠️ Computer-vision model is currently "
-            "in prototype stage."
-        )
-
-        st.write("### 📋 Preliminary Assessment")
-
-        st.write(
-            "Image received successfully. A trained "
-            "computer-vision model will classify "
-            "waterlogging severity in the next stage."
-        )
+        st.subheader("📊 Preliminary Visual Assessment")
 
         st.info(
-            "Recommended action: avoid moving or "
-            "unknown-depth floodwater."
+            "Image received successfully. "
+            "The uploaded image is ready for computer-vision analysis."
         )
+
+        st.write("### 🚧 Current Assessment")
+
+        st.write("**Image Status:** Successfully received")
+        st.write("**Analysis Mode:** Vision Prototype")
+        st.write("**Location:** Not provided")
+
+        st.warning(
+            "⚠️ This prototype does not yet use a trained "
+            "computer-vision model. The result should not be "
+            "treated as an official flood warning."
+        )
+
+        st.write("### 🛟 Safety Recommendation")
+
+        st.write(
+            "• Avoid moving or unknown-depth floodwater."
+        )
+        st.write(
+            "• Stay away from damaged roads and electrical hazards."
+        )
+        st.write(
+            "• Follow instructions from local authorities."
+        )
+
+
 
 # -----------------------------
 # Emergency Response Engine
