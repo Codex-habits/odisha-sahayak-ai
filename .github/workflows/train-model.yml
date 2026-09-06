@@ -1,0 +1,37 @@
+name: Train Flood Risk Model
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install pandas scikit-learn
+
+      - name: Train model
+        run: |
+          cd data/models
+          python train_model.py
+
+      - name: Commit trained model
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add data/models/flood_risk_model.pkl
+          git commit -m "Add trained flood risk model" || echo "No changes"
+          git push
