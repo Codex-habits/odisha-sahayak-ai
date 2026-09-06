@@ -123,7 +123,7 @@ if uploaded_file:
 
     if st.button("🔍 Analyze Image", key="image_analysis"):
 
-       result = analyze_flood_image(image)
+        result = analyze_flood_image(image)
 
         severity = result["severity"]
         brightness = result["brightness"]
@@ -175,7 +175,6 @@ if uploaded_file:
             )
 
         st.write("### 🧠 AI Assessment")
-
         st.write(explanation)
 
         st.write("### 🔎 Visual Signals")
