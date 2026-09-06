@@ -124,10 +124,17 @@ if uploaded_file:
     if st.button("🔍 Analyze Image", key="image_analysis"):
 
         result = analyze_flood_image(image)
-
+        
+        flood_detected = result["flood_detected"]
         severity = result["severity"]
         brightness = result["brightness"]
         blue_signal = result["blue_signal"]
+
+        if flood_detected:
+    st.warning("🌊 POSSIBLE FLOOD / WATERLOGGING DETECTED")
+else:
+    st.success("🛣️ NO OBVIOUS FLOOD DETECTED")
+       
 
         st.subheader("📊 Vision Assessment")
 
