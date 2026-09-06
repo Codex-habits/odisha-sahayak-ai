@@ -9,12 +9,17 @@ st.set_page_config(
     layout="wide"
 )
 
-# Load trained ML model
+# -----------------------------
+# Load ML model
+# -----------------------------
 MODEL_PATH = Path("data/models/flood_risk_model.pkl")
 
 with open(MODEL_PATH, "rb") as file:
     model = pickle.load(file)
 
+# -----------------------------
+# Header
+# -----------------------------
 st.title("🌊 Odisha Sahayak AI")
 st.subheader("Predict. Detect. Respond.")
 
@@ -25,6 +30,9 @@ st.write(
 
 st.divider()
 
+# -----------------------------
+# Dashboard metrics
+# -----------------------------
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -38,6 +46,9 @@ with col3:
 
 st.divider()
 
+# -----------------------------
+# Flood Risk Prediction
+# -----------------------------
 st.header("🧠 AI Flood Risk Prediction")
 
 col1, col2, col3 = st.columns(3)
@@ -69,8 +80,10 @@ if st.button("🔍 Analyze Risk"):
     })
 
     prediction = model.predict(input_data)[0]
-
     probability = model.predict_proba(input_data)[0][1]
+
+    st.divider()
+    st.subheader("📊 AI Assessment")
 
     if prediction == 1:
         st.error("🔴 HIGH FLOOD RISK")
@@ -78,12 +91,19 @@ if st.button("🔍 Analyze Risk"):
         st.success("🟢 LOW FLOOD RISK")
 
     st.metric(
-        "AI Flood Probability",
+        "Model Flood Probability",
         f"{probability * 100:.1f}%"
     )
 
-st.divider()
+    st.caption(
+        "Prototype model: prediction should be validated "
+        "with real local observations before operational use."
+    )
 
+# -----------------------------
+# Image Analysis
+# -----------------------------
+st.divider()
 st.header("📷 AI Flood Image Analysis")
 
 uploaded_file = st.file_uploader(
@@ -101,38 +121,96 @@ if uploaded_file:
 
     if st.button("🔍 Analyze Image"):
 
-        st.info("Analyzing image...")
-
-        # Prototype image-analysis stage
-        # A trained computer-vision model will be connected here.
-        
         st.warning(
-            "⚠️ Prototype analysis: "
-            "A trained flood-image dataset/model is required "
-            "for reliable waterlogging detection."
+            "⚠️ Computer-vision model is currently in prototype stage."
         )
 
-        st.write("📌 Suggested next action:")
+        st.write("### 📋 Preliminary Assessment")
+
         st.write(
-            "Collect the location and report the image "
-            "to the disaster-response system."
+            "The image has been received successfully. "
+            "A trained flood-image model will classify "
+            "waterlogging severity in the next stage."
         )
 
-st.divider()
+        st.info(
+            "Recommended action: verify the location and "
+            "avoid entering moving or unknown-depth floodwater."
+        )
 
-st.header("🤖 Odia Emergency Assistant")
+# -----------------------------
+# Emergency Response Engine
+# -----------------------------
+st.divider()
+st.header("🚨 Emergency Response Engine")
 
 question = st.text_input(
-    "Ask your emergency question:"
+    "Describe your emergency:",
+    placeholder="Example: Mo area re bahut pani achhi..."
 )
 
 if question:
-    st.info(
-        "ଦୟାକରି ସୁରକ୍ଷିତ ସ୍ଥାନକୁ ଯାଆନ୍ତୁ ଏବଂ "
-        "ବନ୍ୟା ପାଣିରେ ପ୍ରବେଶ କରନ୍ତୁ ନାହିଁ।"
-    )
 
-    st.write(
-        "For immediate emergencies, contact appropriate "
-        "local emergency services."
-    )
+    text = question.lower()
+
+    # Flood / waterlogging detection
+    flood_words = [
+        "pani", "water", "flood", "banya",
+        "ban", "waterlogging", "duba",
+        "flooded"
+    ]
+
+    medical_words = [
+        "injury", "injured", "medical",
+        "ambulance", "bleeding"
+    ]
+
+    if any(word in text for word in medical_words):
+
+        st.error("🔴 HIGH PRIORITY — MEDICAL EMERGENCY")
+
+        st.write("### 🛟 Recommended Actions")
+        st.write("• Move to a safe location if possible.")
+        st.write("• Seek immediate medical assistance.")
+        st.write("• Contact appropriate local emergency services.")
+
+    elif any(word in text for word in flood_words):
+
+        st.error("🔴 HIGH PRIORITY — FLOOD / WATERLOGGING")
+
+        st.write("### 🛟 Recommended Actions")
+
+        st.write(
+            "• Move to a safe or elevated location."
+        )
+
+        st.write(
+            "• Avoid walking or driving through moving floodwater."
+        )
+
+        st.write(
+            "• Stay away from electrical equipment "
+            "and damaged power lines."
+        )
+
+        st.write(
+            "• Follow instructions from local authorities."
+        )
+
+        st.write("### 📝 Situation Classification")
+        st.write("**Type:** Flood / Waterlogging")
+        st.write("**Priority:** High")
+
+    else:
+
+        st.info("🟡 MEDIUM PRIORITY — INFORMATION REQUIRED")
+
+        st.write(
+            "Please provide more details such as your "
+            "situation, water level, location type, or emergency."
+        )
+
+st.caption(
+    "Odisha Sahayak AI — Hackathon Prototype | "
+    "AI predictions are decision-support estimates, not official warnings."
+)
