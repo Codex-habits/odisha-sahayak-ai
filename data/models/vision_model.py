@@ -4,11 +4,20 @@ import numpy as np
 
 def analyze_flood_image(image):
     """
-    Prototype flood/waterlogging image assessment.
+    Prototype computer-vision assessment for
+    flood / waterlogging images.
 
-    First checks whether the uploaded image appears to be
-    a real outdoor scene rather than a document/card image.
+    The function first checks whether the uploaded
+    image appears to be a suitable outdoor/scene image.
+
+    NOTE:
+    This is a prototype heuristic, not a trained
+    flood-detection model.
     """
+
+    # -----------------------------------------
+    # Prepare image
+    # -----------------------------------------
 
     image = image.convert("RGB")
     image = image.resize((224, 224))
@@ -27,11 +36,11 @@ def analyze_flood_image(image):
 
     blue_signal = blue - red
 
-    # Colour variation
+    # Overall colour variation
     colour_std = pixels.std()
 
     # -----------------------------------------
-    # Detect likely document/card images
+    # Edge analysis
     # -----------------------------------------
 
     gray = (
@@ -40,16 +49,21 @@ def analyze_flood_image(image):
         + 0.114 * pixels[:, :, 2]
     )
 
-    # Edge strength
-    horizontal_edges = np.abs(np.diff(gray, axis=1)).mean()
-    vertical_edges = np.abs(np.diff(gray, axis=0)).mean()
+    horizontal_edges = np.abs(
+        np.diff(gray, axis=1)
+    ).mean()
 
-    edge_signal = horizontal_edges + vertical_edges
+    vertical_edges = np.abs(
+        np.diff(gray, axis=0)
+    ).mean()
 
-    # Documents/cards usually have:
-    # - relatively uniform background
-    # - strong rectangular/text edges
-    # - comparatively low colour variation
+    edge_signal = (
+        horizontal_edges + vertical_edges
+    )
+
+    # -----------------------------------------
+    # Detect likely document/card images
+    # -----------------------------------------
 
     likely_document = (
         edge_signal > 18
@@ -58,6 +72,7 @@ def analyze_flood_image(image):
     )
 
     if likely_document:
+
         return {
             "valid_scene": False,
             "flood_detected": False,
@@ -67,8 +82,12 @@ def analyze_flood_image(image):
                 "card, or non-scene image. Please upload "
                 "a road, street, or outdoor area photograph."
             ),
-            "brightness": round(float(brightness), 2),
-            "blue_signal": round(float(blue_signal), 2)
+            "brightness": round(
+                float(brightness), 2
+            ),
+            "blue_signal": round(
+                float(blue_signal), 2
+            )
         }
 
     # -----------------------------------------
@@ -85,6 +104,10 @@ def analyze_flood_image(image):
         and brightness < 100
     )
 
+    # -----------------------------------------
+    # HIGH indication
+    # -----------------------------------------
+
     if strong_water_signal:
 
         flood_detected = True
@@ -94,6 +117,10 @@ def analyze_flood_image(image):
             "Strong visual signals may indicate "
             "possible waterlogging."
         )
+
+    # -----------------------------------------
+    # MEDIUM indication
+    # -----------------------------------------
 
     elif possible_water:
 
@@ -105,6 +132,10 @@ def analyze_flood_image(image):
             "possible waterlogging."
         )
 
+    # -----------------------------------------
+    # LOW indication
+    # -----------------------------------------
+
     else:
 
         flood_detected = False
@@ -115,11 +146,19 @@ def analyze_flood_image(image):
             "was detected by this prototype."
         )
 
+    # -----------------------------------------
+    # Return result
+    # -----------------------------------------
+
     return {
         "valid_scene": True,
         "flood_detected": flood_detected,
         "severity": severity,
         "assessment": assessment,
-        "brightness": round(float(brightness), 2),
-        "blue_signal": round(float(blue_signal), 2)
+        "brightness": round(
+            float(brightness), 2
+        ),
+        "blue_signal": round(
+            float(blue_signal), 2
+        )
     }
