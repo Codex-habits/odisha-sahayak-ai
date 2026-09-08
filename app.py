@@ -124,17 +124,21 @@ if uploaded_file:
     if st.button("🔍 Analyze Image", key="image_analysis"):
 
         result = analyze_flood_image(image)
-        
+
         flood_detected = result["flood_detected"]
         severity = result["severity"]
         brightness = result["brightness"]
         blue_signal = result["blue_signal"]
 
-    if flood_detected:
-    st.warning("🌊 POSSIBLE FLOOD / WATERLOGGING DETECTED")
-    else:
-    st.success("🛣️ NO OBVIOUS FLOOD DETECTED")
-       
+        # Flood detection result
+        if flood_detected:
+            st.warning(
+                "🌊 POSSIBLE FLOOD / WATERLOGGING DETECTED"
+            )
+        else:
+            st.success(
+                "🛣️ NO OBVIOUS FLOOD DETECTED"
+            )
 
         st.subheader("📊 Vision Assessment")
 
@@ -143,14 +147,15 @@ if uploaded_file:
             st.error("🔴 HIGH WATERLOGGING INDICATION")
 
             explanation = (
-                "The image shows visual characteristics that "
-                "may be associated with significant water presence."
+                "The image shows visual characteristics "
+                "that may be associated with significant "
+                "water presence."
             )
 
             action = (
                 "Avoid entering the affected area. "
-                "Move to a safer location if necessary and "
-                "verify the situation locally."
+                "Move to a safer location if necessary "
+                "and verify the situation locally."
             )
 
         elif severity == "MEDIUM":
@@ -172,8 +177,9 @@ if uploaded_file:
             st.success("🟢 LOW WATERLOGGING INDICATION")
 
             explanation = (
-                "The image does not show strong visual signals "
-                "associated with waterlogging in this prototype."
+                "The image does not show strong visual "
+                "signals associated with waterlogging "
+                "in this prototype."
             )
 
             action = (
