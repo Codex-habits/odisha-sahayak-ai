@@ -102,8 +102,8 @@ st.divider()
 st.header("📷 AI Flood Image Analysis")
 
 st.write(
-    "Upload a road or area image for preliminary "
-    "waterlogging assessment."
+    "Upload a road, street, or outdoor area image "
+    "for preliminary waterlogging assessment."
 )
 
 uploaded_file = st.file_uploader(
@@ -125,96 +125,112 @@ if uploaded_file:
 
         result = analyze_flood_image(image)
 
+        valid_scene = result["valid_scene"]
         flood_detected = result["flood_detected"]
         severity = result["severity"]
         brightness = result["brightness"]
         blue_signal = result["blue_signal"]
 
-        # Flood detection result
-        if flood_detected:
+        # -----------------------------------------
+        # Reject documents / unsuitable images
+        # -----------------------------------------
+
+        if not valid_scene:
+
+            st.error("❌ INVALID IMAGE FOR FLOOD ANALYSIS")
+
             st.warning(
-                "🌊 POSSIBLE FLOOD / WATERLOGGING DETECTED"
-            )
-        else:
-            st.success(
-                "🛣️ NO OBVIOUS FLOOD DETECTED"
+                "Please upload a road, street, "
+                "waterlogging, or outdoor area photograph."
             )
 
-        st.subheader("📊 Vision Assessment")
-
-        if severity == "HIGH":
-
-            st.error("🔴 HIGH WATERLOGGING INDICATION")
-
-            explanation = (
-                "The image shows visual characteristics "
-                "that may be associated with significant "
-                "water presence."
-            )
-
-            action = (
-                "Avoid entering the affected area. "
-                "Move to a safer location if necessary "
-                "and verify the situation locally."
-            )
-
-        elif severity == "MEDIUM":
-
-            st.warning("🟠 MEDIUM WATERLOGGING INDICATION")
-
-            explanation = (
-                "The image shows some visual characteristics "
-                "that may indicate possible waterlogging."
-            )
-
-            action = (
-                "Use caution around the area and avoid "
-                "unknown-depth water."
-            )
+        # -----------------------------------------
+        # Analyze valid scene image
+        # -----------------------------------------
 
         else:
 
-            st.success("🟢 LOW WATERLOGGING INDICATION")
+            if flood_detected:
 
-            explanation = (
-                "The image does not show strong visual "
-                "signals associated with waterlogging "
-                "in this prototype."
+                st.warning(
+                    "🌊 POSSIBLE FLOOD / WATERLOGGING DETECTED"
+                )
+
+            else:
+
+                st.success(
+                    "🛣️ NO OBVIOUS FLOOD DETECTED"
+                )
+
+            st.subheader("📊 Vision Assessment")
+
+            if severity == "HIGH":
+
+                st.error(
+                    "🔴 HIGH WATERLOGGING INDICATION"
+                )
+
+                action = (
+                    "Avoid entering the affected area. "
+                    "Move to a safer location if necessary "
+                    "and verify the situation locally."
+                )
+
+            elif severity == "MEDIUM":
+
+                st.warning(
+                    "🟠 MEDIUM WATERLOGGING INDICATION"
+                )
+
+                action = (
+                    "Use caution around the area and avoid "
+                    "unknown-depth water."
+                )
+
+            else:
+
+                st.success(
+                    "🟢 LOW WATERLOGGING INDICATION"
+                )
+
+                action = (
+                    "Continue to monitor the situation and "
+                    "follow local authority instructions."
+                )
+
+            st.write("### 🧠 AI Assessment")
+
+            st.write(
+                result["assessment"]
             )
 
-            action = (
-                "Continue to monitor the situation and "
-                "follow local authority instructions."
+            st.write("### 🔎 Visual Signals")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+
+                st.metric(
+                    "Brightness Signal",
+                    brightness
+                )
+
+            with col2:
+
+                st.metric(
+                    "Blue-Channel Signal",
+                    blue_signal
+                )
+
+            st.write("### 🛟 Recommended Action")
+
+            st.info(action)
+
+            st.caption(
+                "Prototype computer-vision assessment. "
+                "This result is not an official flood warning "
+                "and has not been validated for operational use."
             )
-
-        st.write("### 🧠 AI Assessment")
-        st.write(explanation)
-
-        st.write("### 🔎 Visual Signals")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.metric(
-                "Brightness Signal",
-                brightness
-            )
-
-        with col2:
-            st.metric(
-                "Blue-Channel Signal",
-                blue_signal
-            )
-
-        st.write("### 🛟 Recommended Action")
-
-        st.info(action)
-
-        st.caption(
-            "Prototype computer-vision assessment. "
-            "This result is not an official flood warning "
-            "and has not been validated for operational use."
-        )
 # -----------------------------
 # Emergency Response Engine
 # -----------------------------
