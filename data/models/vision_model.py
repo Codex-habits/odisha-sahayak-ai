@@ -1,238 +1,177 @@
+import torch
 from PIL import Image
-import numpy as np
+from transformers import CLIPProcessor, CLIPModel
 
+
+# --------------------------------------------------
+# LOAD PRE-TRAINED AI VISION MODEL
+# --------------------------------------------------
+
+MODEL_NAME = "openai/clip-vit-base-patch32"
+
+_processor = None
+_model = None
+
+
+def load_model():
+
+    global _processor
+    global _model
+
+    if _model is None:
+
+        _processor = CLIPProcessor.from_pretrained(
+            MODEL_NAME
+        )
+
+        _model = CLIPModel.from_pretrained(
+            MODEL_NAME
+        )
+
+        _model.eval()
+
+    return _processor, _model
+
+
+# --------------------------------------------------
+# IMAGE ANALYSIS
+# --------------------------------------------------
 
 def analyze_flood_image(image):
-    """
-    Prototype flood/waterlogging image assessment.
 
-    First performs a conservative check for obvious
-    document/card/text images, then analyzes the scene.
-
-    NOTE:
-    This is a prototype heuristic, not a trained
-    flood-detection classifier.
-    """
-
-    # -----------------------------------------
-    # Prepare image
-    # -----------------------------------------
+    processor, model = load_model()
 
     image = image.convert("RGB")
 
-    original_width, original_height = image.size
+    # --------------------------------------------------
+    # HIGH-LEVEL IMAGE CATEGORIES
+    # --------------------------------------------------
 
-    image = image.resize((224, 224))
+    labels = [
+        "a photo of an identity card or Aadhaar card",
+        "a photo of a document or official paper",
+        "a screenshot containing text",
+        "a photo of a computer or phone screen",
+        "a photo of a flooded street",
+        "a photo of a waterlogged road",
+        "a photo of a normal outdoor road",
+        "a photo of an outdoor area"
+    ]
 
-    pixels = np.array(image).astype(float)
-
-    red = pixels[:, :, 0]
-    green = pixels[:, :, 1]
-    blue = pixels[:, :, 2]
-
-    # -----------------------------------------
-    # Basic measurements
-    # -----------------------------------------
-
-    brightness = pixels.mean()
-
-    red_mean = red.mean()
-    blue_mean = blue.mean()
-
-    blue_signal = blue_mean - red_mean
-
-    colour_std = pixels.std()
-
-    # -----------------------------------------
-    # Grayscale
-    # -----------------------------------------
-
-    gray = (
-        0.299 * red
-        + 0.587 * green
-        + 0.114 * blue
+    inputs = processor(
+        text=labels,
+        images=image,
+        return_tensors="pt",
+        padding=True
     )
 
-    # -----------------------------------------
-    # Edge / texture
-    # -----------------------------------------
+    with torch.no_grad():
 
-    horizontal_edges = np.abs(
-        np.diff(gray, axis=1)
-    ).mean()
+        outputs = model(**inputs)
 
-    vertical_edges = np.abs(
-        np.diff(gray, axis=0)
-    ).mean()
+        scores = outputs.logits_per_image[0]
 
-    edge_signal = (
-        horizontal_edges
-        + vertical_edges
+        probabilities = torch.softmax(
+            scores,
+            dim=0
+        )
+
+    # --------------------------------------------------
+    # FIND BEST CATEGORY
+    # --------------------------------------------------
+
+    best_index = int(
+        torch.argmax(probabilities)
     )
 
-    # -----------------------------------------
-    # White area
-    # -----------------------------------------
+    best_label = labels[best_index]
 
-    white_pixels = (
-        (red > 190)
-        & (green > 190)
-        & (blue > 190)
+    confidence = float(
+        probabilities[best_index]
     )
 
-    white_ratio = white_pixels.mean()
+    # --------------------------------------------------
+    # DOCUMENT / SCREEN REJECTION
+    # --------------------------------------------------
 
-    # -----------------------------------------
-    # Colour variation
-    # -----------------------------------------
+    document_indices = [
+        0,  # Aadhaar / identity card
+        1,  # document
+        2,  # screenshot
+        3   # computer/phone screen
+    ]
 
-    max_channel = np.maximum(
-        np.maximum(red, green),
-        blue
-    )
-
-    min_channel = np.minimum(
-        np.minimum(red, green),
-        blue
-    )
-
-    saturation = max_channel - min_channel
-
-    saturation_mean = saturation.mean()
-
-    # -----------------------------------------
-    # Spatial variation
-    #
-    # Real outdoor scenes usually have
-    # significant differences between regions.
-    # -----------------------------------------
-
-    grid_means = []
-
-    rows = 4
-    cols = 4
-
-    for r in range(rows):
-        for c in range(cols):
-
-            y1 = r * 56
-            y2 = (r + 1) * 56
-
-            x1 = c * 56
-            x2 = (c + 1) * 56
-
-            region = pixels[y1:y2, x1:x2]
-
-            grid_means.append(region.mean())
-
-    spatial_variation = np.std(grid_means)
-
-    # -----------------------------------------
-    # Document score
-    # -----------------------------------------
-
-    document_score = 0
-
-    # Very large white background
-    if white_ratio > 0.60:
-        document_score += 2
-
-    # Very low colour variation
-    if colour_std < 45:
-        document_score += 1
-
-    # Text-like edges
-    if edge_signal > 25:
-        document_score += 1
-
-    # Low saturation
-    if saturation_mean < 30:
-        document_score += 1
-
-    # Bright image
-    if brightness > 150:
-        document_score += 1
-
-    # -----------------------------------------
-    # Scene protection
-    #
-    # If the image has strong spatial variation,
-    # it is more likely to be a real scene.
-    # -----------------------------------------
-
-    scene_like = (
-        spatial_variation > 20
-        or colour_std > 70
-        or saturation_mean > 50
-    )
-
-    # Only reject when document evidence is strong
-    # AND the image does not look like a scene.
-    if document_score >= 5 and not scene_like:
+    if best_index in document_indices:
 
         return {
             "valid_scene": False,
             "flood_detected": False,
             "severity": "INVALID",
+
             "assessment": (
                 "This image appears to be a document, "
-                "ID card, screenshot, or text-heavy image. "
-                "Please upload a road, street, outdoor area, "
-                "or waterlogging photograph."
+                "identity card, screenshot, or screen. "
+                "Please upload a road, street, outdoor "
+                "area, or flood photograph."
             ),
-            "brightness": round(float(brightness), 2),
-            "blue_signal": round(float(blue_signal), 2)
+
+            "brightness": 0,
+            "blue_signal": 0,
+
+            "confidence": round(
+                confidence * 100, 1
+            )
         }
 
-    # -----------------------------------------
-    # Flood / waterlogging assessment
-    # -----------------------------------------
+    # --------------------------------------------------
+    # FLOOD DETECTION
+    # --------------------------------------------------
 
-    possible_water = (
-        blue_signal > 8
-        and brightness < 150
-    )
+    flood_indices = [
+        4,  # flooded street
+        5   # waterlogged road
+    ]
 
-    strong_water_signal = (
-        blue_signal > 15
-        and brightness < 100
-    )
+    if best_index in flood_indices:
 
-    if strong_water_signal:
+        return {
+            "valid_scene": True,
+            "flood_detected": True,
+            "severity": "HIGH",
 
-        flood_detected = True
-        severity = "HIGH"
+            "assessment": (
+                "The AI vision model identified the "
+                "image as a possible flood or "
+                "waterlogging scene."
+            ),
 
-        assessment = (
-            "Strong visual signals may indicate "
-            "possible waterlogging."
-        )
+            "brightness": 0,
+            "blue_signal": 0,
 
-    elif possible_water:
+            "confidence": round(
+                confidence * 100, 1
+            )
+        }
 
-        flood_detected = True
-        severity = "MEDIUM"
-
-        assessment = (
-            "Some visual signals may indicate "
-            "possible waterlogging."
-        )
-
-    else:
-
-        flood_detected = False
-        severity = "LOW"
-
-        assessment = (
-            "No strong visual evidence of waterlogging "
-            "was detected by this prototype."
-        )
+    # --------------------------------------------------
+    # NORMAL OUTDOOR SCENE
+    # --------------------------------------------------
 
     return {
         "valid_scene": True,
-        "flood_detected": flood_detected,
-        "severity": severity,
-        "assessment": assessment,
-        "brightness": round(float(brightness), 2),
-        "blue_signal": round(float(blue_signal), 2)
+        "flood_detected": False,
+        "severity": "LOW",
+
+        "assessment": (
+            "The AI vision model identified the "
+            "image as an outdoor scene without a "
+            "strong flood indication."
+        ),
+
+        "brightness": 0,
+        "blue_signal": 0,
+
+        "confidence": round(
+            confidence * 100, 1
+        )
     }
