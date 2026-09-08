@@ -130,9 +130,9 @@ if uploaded_file:
         brightness = result["brightness"]
         blue_signal = result["blue_signal"]
 
-        if flood_detected:
+    if flood_detected:
     st.warning("🌊 POSSIBLE FLOOD / WATERLOGGING DETECTED")
-else:
+    else:
     st.success("🛣️ NO OBVIOUS FLOOD DETECTED")
        
 
