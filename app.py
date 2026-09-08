@@ -102,12 +102,12 @@ st.divider()
 st.header("📷 AI Flood Image Analysis")
 
 st.write(
-    "Upload a road, street, or outdoor area image "
-    "for preliminary waterlogging assessment."
+    "Upload a road, street, outdoor area, or "
+    "waterlogging photograph for AI assessment."
 )
 
 uploaded_file = st.file_uploader(
-    "📤 Upload flood/road image",
+    "📤 Upload image",
     type=["jpg", "jpeg", "png"]
 )
 
@@ -117,35 +117,41 @@ if uploaded_file:
 
     st.image(
         image,
-        caption="Uploaded Area Image",
+        caption="Uploaded Image",
         use_container_width=True
     )
 
     if st.button("🔍 Analyze Image", key="image_analysis"):
 
-        result = analyze_flood_image(image)
+        with st.spinner("🤖 AI is analyzing the image..."):
+
+            result = analyze_flood_image(image)
+
+        # -----------------------------------------
+        # Extract AI result
+        # -----------------------------------------
 
         valid_scene = result["valid_scene"]
         flood_detected = result["flood_detected"]
         severity = result["severity"]
-        brightness = result["brightness"]
-        blue_signal = result["blue_signal"]
+        confidence = result.get("confidence", 0)
 
         # -----------------------------------------
-        # Reject documents / unsuitable images
+        # INVALID IMAGE
         # -----------------------------------------
 
         if not valid_scene:
 
-            st.error("❌ INVALID IMAGE FOR FLOOD ANALYSIS")
+            st.error(
+                "❌ INVALID IMAGE FOR FLOOD ANALYSIS"
+            )
 
             st.warning(
-                "Please upload a road, street, "
-                "waterlogging, or outdoor area photograph."
+                result["assessment"]
             )
 
         # -----------------------------------------
-        # Analyze valid scene image
+        # VALID IMAGE
         # -----------------------------------------
 
         else:
@@ -153,7 +159,8 @@ if uploaded_file:
             if flood_detected:
 
                 st.warning(
-                    "🌊 POSSIBLE FLOOD / WATERLOGGING DETECTED"
+                    "🌊 POSSIBLE FLOOD / "
+                    "WATERLOGGING DETECTED"
                 )
 
             else:
@@ -167,35 +174,20 @@ if uploaded_file:
             if severity == "HIGH":
 
                 st.error(
-                    "🔴 HIGH WATERLOGGING INDICATION"
-                )
-
-                action = (
-                    "Avoid entering the affected area. "
-                    "Move to a safer location if necessary "
-                    "and verify the situation locally."
+                    "🔴 HIGH FLOOD / "
+                    "WATERLOGGING INDICATION"
                 )
 
             elif severity == "MEDIUM":
 
                 st.warning(
-                    "🟠 MEDIUM WATERLOGGING INDICATION"
-                )
-
-                action = (
-                    "Use caution around the area and avoid "
-                    "unknown-depth water."
+                    "🟠 MEDIUM FLOOD INDICATION"
                 )
 
             else:
 
                 st.success(
-                    "🟢 LOW WATERLOGGING INDICATION"
-                )
-
-                action = (
-                    "Continue to monitor the situation and "
-                    "follow local authority instructions."
+                    "🟢 LOW FLOOD INDICATION"
                 )
 
             st.write("### 🧠 AI Assessment")
@@ -204,32 +196,38 @@ if uploaded_file:
                 result["assessment"]
             )
 
-            st.write("### 🔎 Visual Signals")
+            st.write("### 🤖 AI Vision Confidence")
 
-            col1, col2 = st.columns(2)
+            st.metric(
+                "Classification Confidence",
+                f"{confidence:.1f}%"
+            )
 
-            with col1:
+            st.write(
+                "### 🛟 Recommended Action"
+            )
 
-                st.metric(
-                    "Brightness Signal",
-                    brightness
+            if flood_detected:
+
+                st.info(
+                    "Avoid entering unknown-depth "
+                    "floodwater and follow local "
+                    "authority instructions."
                 )
 
-            with col2:
+            else:
 
-                st.metric(
-                    "Blue-Channel Signal",
-                    blue_signal
+                st.info(
+                    "No strong flood indication was "
+                    "identified by the prototype. "
+                    "Continue monitoring the situation."
                 )
-
-            st.write("### 🛟 Recommended Action")
-
-            st.info(action)
 
             st.caption(
-                "Prototype computer-vision assessment. "
-                "This result is not an official flood warning "
-                "and has not been validated for operational use."
+                "Prototype AI vision assessment. "
+                "This result is not an official flood "
+                "warning and has not been validated "
+                "for operational use."
             )
 # -----------------------------
 # Emergency Response Engine
