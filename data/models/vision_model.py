@@ -4,25 +4,19 @@ import numpy as np
 
 def analyze_flood_image(image):
     """
-    Prototype computer-vision assessment.
+    Prototype flood/waterlogging image assessment.
 
-    The system first tries to reject likely:
-    - documents
-    - ID cards
-    - screenshots
-    - text-heavy images
-
-    Then it performs a simple flood/waterlogging
-    visual assessment.
+    First performs a conservative check for obvious
+    document/card/text images, then analyzes the scene.
 
     NOTE:
-    This is a heuristic prototype, NOT a trained
-    flood or document classifier.
+    This is a prototype heuristic, not a trained
+    flood-detection classifier.
     """
 
-    # --------------------------------------------------
-    # PREPARE IMAGE
-    # --------------------------------------------------
+    # -----------------------------------------
+    # Prepare image
+    # -----------------------------------------
 
     image = image.convert("RGB")
 
@@ -32,28 +26,26 @@ def analyze_flood_image(image):
 
     pixels = np.array(image).astype(float)
 
-    # --------------------------------------------------
-    # BASIC IMAGE FEATURES
-    # --------------------------------------------------
-
-    brightness = pixels.mean()
-
     red = pixels[:, :, 0]
     green = pixels[:, :, 1]
     blue = pixels[:, :, 2]
 
+    # -----------------------------------------
+    # Basic measurements
+    # -----------------------------------------
+
+    brightness = pixels.mean()
+
     red_mean = red.mean()
-    green_mean = green.mean()
     blue_mean = blue.mean()
 
     blue_signal = blue_mean - red_mean
 
-    # Colour variation
     colour_std = pixels.std()
 
-    # --------------------------------------------------
-    # GRAYSCALE IMAGE
-    # --------------------------------------------------
+    # -----------------------------------------
+    # Grayscale
+    # -----------------------------------------
 
     gray = (
         0.299 * red
@@ -61,9 +53,9 @@ def analyze_flood_image(image):
         + 0.114 * blue
     )
 
-    # --------------------------------------------------
-    # EDGE / TEXT SIGNAL
-    # --------------------------------------------------
+    # -----------------------------------------
+    # Edge / texture
+    # -----------------------------------------
 
     horizontal_edges = np.abs(
         np.diff(gray, axis=1)
@@ -78,33 +70,21 @@ def analyze_flood_image(image):
         + vertical_edges
     )
 
-    # --------------------------------------------------
-    # BRIGHT / WHITE REGION
-    # --------------------------------------------------
+    # -----------------------------------------
+    # White area
+    # -----------------------------------------
 
     white_pixels = (
-        (red > 180)
-        & (green > 180)
-        & (blue > 180)
+        (red > 190)
+        & (green > 190)
+        & (blue > 190)
     )
 
     white_ratio = white_pixels.mean()
 
-    # --------------------------------------------------
-    # DARK REGION
-    # --------------------------------------------------
-
-    dark_pixels = (
-        (red < 70)
-        & (green < 70)
-        & (blue < 70)
-    )
-
-    dark_ratio = dark_pixels.mean()
-
-    # --------------------------------------------------
-    # SATURATION
-    # --------------------------------------------------
+    # -----------------------------------------
+    # Colour variation
+    # -----------------------------------------
 
     max_channel = np.maximum(
         np.maximum(red, green),
@@ -116,64 +96,79 @@ def analyze_flood_image(image):
         blue
     )
 
-    saturation = (
-        max_channel - min_channel
-    )
+    saturation = max_channel - min_channel
 
     saturation_mean = saturation.mean()
 
-    # --------------------------------------------------
-    # DOCUMENT / CARD DETECTION
-    # --------------------------------------------------
+    # -----------------------------------------
+    # Spatial variation
+    #
+    # Real outdoor scenes usually have
+    # significant differences between regions.
+    # -----------------------------------------
+
+    grid_means = []
+
+    rows = 4
+    cols = 4
+
+    for r in range(rows):
+        for c in range(cols):
+
+            y1 = r * 56
+            y2 = (r + 1) * 56
+
+            x1 = c * 56
+            x2 = (c + 1) * 56
+
+            region = pixels[y1:y2, x1:x2]
+
+            grid_means.append(region.mean())
+
+    spatial_variation = np.std(grid_means)
+
+    # -----------------------------------------
+    # Document score
+    # -----------------------------------------
 
     document_score = 0
 
-    # Large white background
-    if white_ratio > 0.35:
+    # Very large white background
+    if white_ratio > 0.60:
         document_score += 2
 
-    # Low colour variation
-    if colour_std < 65:
+    # Very low colour variation
+    if colour_std < 45:
         document_score += 1
 
-    # Strong edge/text-like pattern
-    if edge_signal > 18:
-        document_score += 2
+    # Text-like edges
+    if edge_signal > 25:
+        document_score += 1
 
     # Low saturation
-    if saturation_mean < 45:
+    if saturation_mean < 30:
         document_score += 1
 
     # Bright image
-    if brightness > 120:
+    if brightness > 150:
         document_score += 1
 
-    # Very wide document-like image
-    aspect_ratio = (
-        original_width / max(original_height, 1)
+    # -----------------------------------------
+    # Scene protection
+    #
+    # If the image has strong spatial variation,
+    # it is more likely to be a real scene.
+    # -----------------------------------------
+
+    scene_like = (
+        spatial_variation > 20
+        or colour_std > 70
+        or saturation_mean > 50
     )
 
-    if aspect_ratio > 1.8:
-        document_score += 1
-
-    # --------------------------------------------------
-    # TEXT / SCREENSHOT-LIKE DETECTION
-    # --------------------------------------------------
-
-    text_like = False
-
-    if (
-        edge_signal > 22
-        and white_ratio > 0.25
-        and brightness > 100
-    ):
-        text_like = True
-
-    # --------------------------------------------------
-    # INVALID IMAGE DECISION
-    # --------------------------------------------------
-
-    if document_score >= 4 or text_like:
+    # Only reject when document evidence is strong
+    # AND the image does not look like a scene.
+    if document_score >= 5 and not scene_like:
 
         return {
             "valid_scene": False,
@@ -185,17 +180,13 @@ def analyze_flood_image(image):
                 "Please upload a road, street, outdoor area, "
                 "or waterlogging photograph."
             ),
-            "brightness": round(
-                float(brightness), 2
-            ),
-            "blue_signal": round(
-                float(blue_signal), 2
-            )
+            "brightness": round(float(brightness), 2),
+            "blue_signal": round(float(blue_signal), 2)
         }
 
-    # --------------------------------------------------
-    # FLOOD / WATERLOGGING ANALYSIS
-    # --------------------------------------------------
+    # -----------------------------------------
+    # Flood / waterlogging assessment
+    # -----------------------------------------
 
     possible_water = (
         blue_signal > 8
@@ -207,10 +198,6 @@ def analyze_flood_image(image):
         and brightness < 100
     )
 
-    # --------------------------------------------------
-    # HIGH
-    # --------------------------------------------------
-
     if strong_water_signal:
 
         flood_detected = True
@@ -220,10 +207,6 @@ def analyze_flood_image(image):
             "Strong visual signals may indicate "
             "possible waterlogging."
         )
-
-    # --------------------------------------------------
-    # MEDIUM
-    # --------------------------------------------------
 
     elif possible_water:
 
@@ -235,10 +218,6 @@ def analyze_flood_image(image):
             "possible waterlogging."
         )
 
-    # --------------------------------------------------
-    # LOW
-    # --------------------------------------------------
-
     else:
 
         flood_detected = False
@@ -249,19 +228,11 @@ def analyze_flood_image(image):
             "was detected by this prototype."
         )
 
-    # --------------------------------------------------
-    # FINAL RESULT
-    # --------------------------------------------------
-
     return {
         "valid_scene": True,
         "flood_detected": flood_detected,
         "severity": severity,
         "assessment": assessment,
-        "brightness": round(
-            float(brightness), 2
-        ),
-        "blue_signal": round(
-            float(blue_signal), 2
-        )
+        "brightness": round(float(brightness), 2),
+        "blue_signal": round(float(blue_signal), 2)
     }
