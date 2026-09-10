@@ -26,7 +26,11 @@ with open(MODEL_PATH, "rb") as file:
 
 if "flood_risk_status" not in st.session_state:
     st.session_state.flood_risk_status = "MONITORING"
+if "vision_status" not in st.session_state:
+    st.session_state.vision_status = "READY"
 
+if "vision_severity" not in st.session_state:
+    st.session_state.vision_severity = "NONE"
 if "flood_probability" not in st.session_state:
     st.session_state.flood_probability = 0.0
 
@@ -176,10 +180,29 @@ with cmd1:
             "🟡 MONITORING"
         )
 with cmd2:
-    st.metric(
-        "📷 Vision AI",
-        "ONLINE"
-    )
+
+    vision_status = st.session_state.vision_status
+
+    if vision_status == "FLOOD DETECTED":
+
+        st.metric(
+            "📷 Vision AI",
+            "🌊 FLOOD"
+        )
+
+    elif vision_status == "NO FLOOD":
+
+        st.metric(
+            "📷 Vision AI",
+            "🟢 CLEAR"
+        )
+
+    else:
+
+        st.metric(
+            "📷 Vision AI",
+            "🟡 READY"
+        )
 
 with cmd3:
     st.metric(
@@ -338,6 +361,14 @@ if uploaded_file:
         flood_detected = result["flood_detected"]
         severity = result["severity"]
         confidence = result.get("confidence", 0)
+        st.session_state.vision_status = (
+               "FLOOD DETECTED"
+               if flood_detected
+               else "NO FLOOD"
+        )
+
+        st.session_state.vision_severity = 
+        severity
 
         # -----------------------------------------
         # INVALID IMAGE
