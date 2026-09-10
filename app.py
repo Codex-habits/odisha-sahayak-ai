@@ -206,22 +206,37 @@ st.info(
     "Displayed monitoring values are illustrative and "
     "are not live government disaster warnings."
 )
-
 # -----------------------------
 # Flood Risk Prediction
 # -----------------------------
+
 st.header("🧠 AI Flood Risk Prediction")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    rainfall = st.slider("Rainfall (mm)", 0, 500, 100)
+    rainfall = st.slider(
+        "Rainfall (mm)",
+        0,
+        500,
+        100
+    )
 
 with col2:
-    humidity = st.slider("Humidity (%)", 0, 100, 70)
+    humidity = st.slider(
+        "Humidity (%)",
+        0,
+        100,
+        70
+    )
 
 with col3:
-    water_level = st.slider("Water Level", 0, 10, 3)
+    water_level = st.slider(
+        "Water Level",
+        0,
+        10,
+        3
+    )
 
 if st.button("🔍 Analyze Risk"):
 
@@ -232,22 +247,33 @@ if st.button("🔍 Analyze Risk"):
     })
 
     prediction = model.predict(input_data)[0]
-    probability = model.predict_proba(input_data)[0][1]
+
+    probability = model.predict_proba(
+        input_data
+    )[0][1]
+
+    # Save result for dashboard
+    st.session_state.flood_probability = (
+        probability * 100
+    )
+
+    if prediction == 1:
+
+        st.session_state.flood_risk_status = "HIGH"
+
+        st.error(
+            "🔴 HIGH FLOOD RISK"
+        )
+
+    else:
+
+        st.session_state.flood_risk_status = "LOW"
+
+        st.success(
+            "🟢 LOW FLOOD RISK"
+        )
 
     st.subheader("📊 AI Assessment")
-
-if prediction == 1:
-
-    st.error("🔴 HIGH FLOOD RISK")
-
-    st.session_state.flood_risk_status = "HIGH"
-    st.session_state.flood_probability = probability * 100
-else:
-
-    st.success("🟢 LOW FLOOD RISK")
-
-    st.session_state.flood_risk_status = "LOW"
-    st.session_state.flood_probability = probability * 100
 
     st.metric(
         "Model Flood Probability",
@@ -255,9 +281,16 @@ else:
     )
 
     st.caption(
-        "Prototype model. Predictions should be validated "
-        "with real local observations."
+        "Prototype model trained on synthetic data. "
+        "Predictions should be validated with real "
+        "local observations."
     )
+ 
+
+
+
+
+    
 # --------------------------------------------------
 # FLOOD IMAGE ANALYSIS
 # --------------------------------------------------
