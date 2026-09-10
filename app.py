@@ -20,6 +20,15 @@ MODEL_PATH = Path("data/models/flood_risk_model.pkl")
 
 with open(MODEL_PATH, "rb") as file:
     model = pickle.load(file)
+# -----------------------------
+# Flood Risk State
+# -----------------------------
+
+if "flood_risk_status" not in st.session_state:
+    st.session_state.flood_risk_status = "MONITORING"
+
+if "flood_probability" not in st.session_state:
+    st.session_state.flood_probability = 0.0
 
 # -----------------------------
 # Header
@@ -140,10 +149,26 @@ st.write(
 cmd1, cmd2, cmd3, cmd4 = st.columns(4)
 
 with cmd1:
-    st.metric(
-        "🌊 Flood Risk",
-        "MONITORING"
-    )
+
+    risk_status = st.session_state.flood_risk_status
+
+    if risk_status == "HIGH":
+        st.metric(
+            "🌊 Flood Risk",
+            "🔴 HIGH"
+        )
+
+    elif risk_status == "LOW":
+        st.metric(
+            "🌊 Flood Risk",
+            "🟢 LOW"
+        )
+
+    else:
+        st.metric(
+            "🌊 Flood Risk",
+            "🟡 MONITORING"
+        )
 
 with cmd2:
     st.metric(
@@ -212,9 +237,18 @@ if st.button("🔍 Analyze Risk"):
     st.subheader("📊 AI Assessment")
 
     if prediction == 1:
-        st.error("🔴 HIGH FLOOD RISK")
+
+    st.error("🔴 HIGH FLOOD RISK")
+
+    st.session_state.flood_risk_status = "HIGH"
+    st.session_state.flood_probability = probability * 100
+
     else:
-        st.success("🟢 LOW FLOOD RISK")
+
+    st.success("🟢 LOW FLOOD RISK")
+
+    st.session_state.flood_risk_status = "LOW"
+    st.session_state.flood_probability = probability * 100
 
     st.metric(
         "Model Flood Probability",
