@@ -49,6 +49,79 @@ with col3:
     st.metric("Areas Monitored", "12")
 
 st.divider()
+# --------------------------------------------------
+# DISASTER SITUATION DASHBOARD
+# --------------------------------------------------
+
+st.header("🛰️ Odisha Disaster Situation Dashboard")
+
+st.write(
+    "Prototype monitoring view showing example disaster-risk "
+    "locations across Odisha."
+)
+
+# Demo monitoring locations
+# These are illustrative prototype locations,
+# not live government data.
+
+monitoring_data = pd.DataFrame({
+    "Location": [
+        "Bhubaneswar",
+        "Puri",
+        "Cuttack",
+        "Balasore",
+        "Kendrapara",
+        "Jagatsinghpur"
+    ],
+    "Latitude": [
+        20.2961,
+        19.8135,
+        20.4625,
+        21.4942,
+        20.5017,
+        20.2644
+    ],
+    "Longitude": [
+        85.8245,
+        85.8312,
+        85.8828,
+        86.9317,
+        86.4220,
+        86.1711
+    ],
+    "Risk Status": [
+        "Monitoring",
+        "High",
+        "Medium",
+        "Monitoring",
+        "High",
+        "Medium"
+    ]
+})
+
+st.subheader("📍 Monitoring Map")
+
+st.map(
+    monitoring_data,
+    latitude="Latitude",
+    longitude="Longitude",
+    size=100
+)
+
+st.caption(
+    "⚠️ Prototype map using illustrative monitoring data. "
+    "Locations and risk statuses are not live official warnings."
+)
+
+st.subheader("📊 Area Monitoring Status")
+
+st.dataframe(
+    monitoring_data[
+        ["Location", "Risk Status"]
+    ],
+    use_container_width=True,
+    hide_index=True
+)
 
 # -----------------------------
 # Flood Risk Prediction
