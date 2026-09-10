@@ -236,14 +236,13 @@ if st.button("🔍 Analyze Risk"):
 
     st.subheader("📊 AI Assessment")
 
-    if prediction == 1:
+if prediction == 1:
 
     st.error("🔴 HIGH FLOOD RISK")
 
     st.session_state.flood_risk_status = "HIGH"
     st.session_state.flood_probability = probability * 100
-
-    else:
+else:
 
     st.success("🟢 LOW FLOOD RISK")
 
