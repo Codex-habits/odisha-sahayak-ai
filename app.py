@@ -151,25 +151,30 @@ cmd1, cmd2, cmd3, cmd4 = st.columns(4)
 with cmd1:
 
     risk_status = st.session_state.flood_risk_status
+    risk_probability = st.session_state.flood_probability
 
     if risk_status == "HIGH":
+
         st.metric(
             "🌊 Flood Risk",
-            "🔴 HIGH"
+            "🔴 HIGH",
+            f"{risk_probability:.1f}% probability"
         )
 
     elif risk_status == "LOW":
+
         st.metric(
             "🌊 Flood Risk",
-            "🟢 LOW"
+            "🟢 LOW",
+            f"{risk_probability:.1f}% probability"
         )
 
     else:
+
         st.metric(
             "🌊 Flood Risk",
             "🟡 MONITORING"
         )
-
 with cmd2:
     st.metric(
         "📷 Vision AI",
