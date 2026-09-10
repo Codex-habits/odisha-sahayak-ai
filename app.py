@@ -105,7 +105,7 @@ st.map(
     monitoring_data,
     latitude="Latitude",
     longitude="Longitude",
-    size=150
+    size=150,
     zoom=7
     
 )
