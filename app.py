@@ -197,8 +197,7 @@ if uploaded_file:
             )
 
             st.write("### 🤖 AI Vision Confidence")
-            confidence 
-            = result.get("confidence", 0)
+            confidence  =result.get("confidence", 0)
             
 
             st.metric(
