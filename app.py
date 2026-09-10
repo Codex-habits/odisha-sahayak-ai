@@ -124,6 +124,63 @@ st.dataframe(
     use_container_width=True,
     hide_index=True
 )
+# --------------------------------------------------
+# DISASTER COMMAND PANEL
+# --------------------------------------------------
+
+st.divider()
+
+st.header("🚨 Disaster Command Panel")
+
+st.write(
+    "Unified prototype status panel combining "
+    "the available Odisha Sahayak AI modules."
+)
+
+cmd1, cmd2, cmd3, cmd4 = st.columns(4)
+
+with cmd1:
+    st.metric(
+        "🌊 Flood Risk",
+        "MONITORING"
+    )
+
+with cmd2:
+    st.metric(
+        "📷 Vision AI",
+        "ONLINE"
+    )
+
+with cmd3:
+    st.metric(
+        "🚨 Emergency Engine",
+        "ONLINE"
+    )
+
+with cmd4:
+    st.metric(
+        "📍 Areas Monitored",
+        "12"
+    )
+
+st.subheader("🟢 AI System Status")
+
+status1, status2, status3 = st.columns(3)
+
+with status1:
+    st.success("🧠 Flood Risk Model\n\nONLINE")
+
+with status2:
+    st.success("📷 Vision Analysis\n\nONLINE")
+
+with status3:
+    st.success("🚨 Emergency Response\n\nONLINE")
+
+st.info(
+    "This command panel is a hackathon prototype. "
+    "Displayed monitoring values are illustrative and "
+    "are not live government disaster warnings."
+)
 
 # -----------------------------
 # Flood Risk Prediction
