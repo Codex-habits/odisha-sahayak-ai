@@ -367,8 +367,7 @@ if uploaded_file:
                else "NO FLOOD"
         )
 
-        st.session_state.vision_severity = 
-        severity
+        st.session_state.vision_severity =  severity
 
         # -----------------------------------------
         # INVALID IMAGE
