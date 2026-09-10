@@ -105,7 +105,9 @@ st.map(
     monitoring_data,
     latitude="Latitude",
     longitude="Longitude",
-    size=100
+    size=150
+    zoom=7
+    
 )
 
 st.caption(
