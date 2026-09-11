@@ -227,6 +227,101 @@ with cmd3:
     elif emergency_status == "MEDIUM":
 
         st.metric(
+# --------------------------------------------------
+# PROFESSIONAL DISASTER COMMAND CENTER
+# --------------------------------------------------
+
+st.divider()
+
+st.header("🚨 Odisha Sahayak AI — Disaster Command Center")
+
+st.write(
+    "Unified AI decision-support dashboard combining "
+    "flood prediction, image analysis, and emergency reports."
+)
+
+# --------------------------------------------------
+# LIVE AI MODULE STATUS
+# --------------------------------------------------
+
+cmd1, cmd2, cmd3, cmd4 = st.columns(4)
+
+with cmd1:
+
+    risk_status = st.session_state.flood_risk_status
+    risk_probability = st.session_state.flood_probability
+
+    if risk_status == "HIGH":
+
+        st.metric(
+            "🌊 Flood Risk",
+            "🔴 HIGH",
+            f"{risk_probability:.1f}% model score"
+        )
+
+    elif risk_status == "LOW":
+
+        st.metric(
+            "🌊 Flood Risk",
+            "🟢 LOW",
+            f"{risk_probability:.1f}% model score"
+        )
+
+    else:
+
+        st.metric(
+            "🌊 Flood Risk",
+            "🟡 MONITORING"
+        )
+
+
+with cmd2:
+
+    vision_status = st.session_state.vision_status
+
+    if vision_status == "FLOOD DETECTED":
+
+        st.metric(
+            "📷 Vision AI",
+            "🌊 FLOOD"
+        )
+
+    elif vision_status == "NO FLOOD":
+
+        st.metric(
+            "📷 Vision AI",
+            "🟢 CLEAR"
+        )
+
+    else:
+
+        st.metric(
+            "📷 Vision AI",
+            "🟡 READY"
+        )
+
+
+with cmd3:
+
+    emergency_status = st.session_state.emergency_status
+
+    if emergency_status == "CRITICAL":
+
+        st.metric(
+            "🚨 Emergency",
+            "🔴 CRITICAL"
+        )
+
+    elif emergency_status == "HIGH":
+
+        st.metric(
+            "🚨 Emergency",
+            "🟠 HIGH"
+        )
+
+    elif emergency_status == "MEDIUM":
+
+        st.metric(
             "🚨 Emergency",
             "🟡 MEDIUM"
         )
@@ -245,29 +340,119 @@ with cmd3:
             "🟢 READY"
         )
 
+
 with cmd4:
+
     st.metric(
         "📍 Areas Monitored",
         "12"
     )
 
-st.subheader("🟢 AI System Status")
 
-status1, status2, status3 = st.columns(3)
+# --------------------------------------------------
+# OVERALL SITUATION ASSESSMENT
+# --------------------------------------------------
 
-with status1:
-    st.success("🧠 Flood Risk Model\n\nONLINE")
+st.subheader("🧠 Overall Situation Assessment")
 
-with status2:
-    st.success("📷 Vision Analysis\n\nONLINE")
+risk = st.session_state.flood_risk_status
+vision = st.session_state.vision_status
+emergency = st.session_state.emergency_status
 
-with status3:
-    st.success("🚨 Emergency Response\n\nONLINE")
+if (
+    risk == "HIGH"
+    or vision == "FLOOD DETECTED"
+    or emergency == "CRITICAL"
+):
+
+    st.error(
+        "🔴 HIGH ATTENTION REQUIRED — "
+        "One or more AI modules indicate a potentially "
+        "serious situation."
+    )
+
+elif (
+    risk == "LOW"
+    and vision == "NO FLOOD"
+    and emergency in ["READY", "INFORMATION REQUIRED"]
+):
+
+    st.success(
+        "🟢 CURRENT ASSESSMENT — "
+        "No strong high-risk signal is currently detected."
+    )
+
+else:
+
+    st.warning(
+        "🟡 MONITORING REQUIRED — "
+        "The system has detected an intermediate or "
+        "incomplete situation signal."
+    )
+
+
+# --------------------------------------------------
+# AI DECISION SUMMARY
+# --------------------------------------------------
+
+st.subheader("📊 AI Decision Summary")
+
+summary_data = pd.DataFrame({
+    "Module": [
+        "Flood Risk Model",
+        "Vision AI",
+        "Emergency Response"
+    ],
+    "Current Status": [
+        risk,
+        vision,
+        emergency
+    ]
+})
+
+st.dataframe(
+    summary_data,
+    use_container_width=True,
+    hide_index=True
+)
+
+
+# --------------------------------------------------
+# SYSTEM READINESS
+# --------------------------------------------------
+
+st.subheader("🛰️ System Readiness")
+
+ready1, ready2, ready3 = st.columns(3)
+
+with ready1:
+
+    st.success(
+        "🧠 Flood Prediction\n\n"
+        "ONLINE"
+    )
+
+with ready2:
+
+    st.success(
+        "📷 Vision Analysis\n\n"
+        "ONLINE"
+    )
+
+with ready3:
+
+    st.success(
+        "🚨 Emergency Engine\n\n"
+        "ONLINE"
+    )
+
 
 st.info(
-    "This command panel is a hackathon prototype. "
-    "Displayed monitoring values are illustrative and "
-    "are not live government disaster warnings."
+    "⚠️ Hackathon prototype: AI outputs are "
+    "decision-support estimates. Monitoring locations "
+    "and displayed values are illustrative and are not "
+    "live government disaster warnings."
+    )
 )
  # --------------------------------------------------
 # FLOOD RISK ASSESSMENT
