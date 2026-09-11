@@ -227,6 +227,23 @@ with cmd3:
     elif emergency_status == "MEDIUM":
 
         st.metric(
+    "🚨 Emergency",
+    "🟡 MEDIUM"
+)
+
+    elif emergency_status == "INFORMATION REQUIRED":
+
+        st.metric(
+          "🚨 Emergency",
+        "ℹ️ INFO NEEDED"
+    )
+
+    else:
+
+       st.metric(
+        "🚨 Emergency",
+        "🟢 READY"
+    )
 # --------------------------------------------------
 # PROFESSIONAL DISASTER COMMAND CENTER
 # --------------------------------------------------
