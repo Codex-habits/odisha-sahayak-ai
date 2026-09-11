@@ -269,39 +269,49 @@ st.info(
     "Displayed monitoring values are illustrative and "
     "are not live government disaster warnings."
 )
-# -----------------------------
-# Flood Risk Prediction
-# -----------------------------
+ # --------------------------------------------------
+# FLOOD RISK ASSESSMENT
+# --------------------------------------------------
 
-st.header("🧠 AI Flood Risk Prediction")
+st.divider()
+
+st.header("🌊 Flood Risk Assessment")
+
+st.write(
+    "Enter environmental conditions to estimate "
+    "prototype flood risk."
+)
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
     rainfall = st.slider(
-        "Rainfall (mm)",
-        0,
-        500,
-        100
+        "🌧️ Rainfall (mm)",
+        min_value=0.0,
+        max_value=500.0,
+        value=100.0,
+        step=1.0
     )
 
 with col2:
     humidity = st.slider(
-        "Humidity (%)",
-        0,
-        100,
-        70
+        "💧 Humidity (%)",
+        min_value=0.0,
+        max_value=100.0,
+        value=70.0,
+        step=1.0
     )
 
 with col3:
     water_level = st.slider(
-        "Water Level",
-        0,
-        10,
-        3
+        "🌊 Water Level",
+        min_value=0.0,
+        max_value=10.0,
+        value=3.0,
+        step=0.1
     )
 
-if st.button("🔍 Analyze Risk"):
+if st.button("🔍 Analyze Risk", key="risk_analysis"):
 
     input_data = pd.DataFrame({
         "rainfall": [rainfall],
@@ -311,49 +321,53 @@ if st.button("🔍 Analyze Risk"):
 
     prediction = model.predict(input_data)[0]
 
-    probability = model.predict_proba(
-        input_data
-    )[0][1]
+    probability = model.predict_proba(input_data)[0][1]
 
-    # Save result for dashboard
-    st.session_state.flood_probability = (
-        probability * 100
-    )
+    confidence = round(float(probability) * 100, 2)
 
     if prediction == 1:
 
-        st.session_state.flood_risk_status = "HIGH"
+        st.error("🔴 HIGH FLOOD RISK")
 
-        st.error(
-            "🔴 HIGH FLOOD RISK"
+        st.write(
+            "The prototype model indicates conditions "
+            "associated with increased flood risk."
         )
 
     else:
 
-        st.session_state.flood_risk_status = "LOW"
+        st.success("🟢 LOW FLOOD RISK")
 
-        st.success(
-            "🟢 LOW FLOOD RISK"
+        st.write(
+            "The prototype model does not indicate "
+            "high flood risk for the entered conditions."
         )
 
-    st.subheader("📊 AI Assessment")
+    st.subheader("📊 Risk Analysis")
 
-    st.metric(
-        "Model Flood Probability",
-        f"{probability * 100:.1f}%"
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "Flood Probability",
+            f"{confidence}%"
+        )
+
+    with col2:
+        st.metric(
+            "Water Level",
+            f"{water_level:.1f}"
+        )
+
+    st.progress(
+        min(max(confidence / 100, 0.0), 1.0)
     )
 
-    st.caption(
-        "Prototype model trained on synthetic data. "
-        "Predictions should be validated with real "
-        "local observations."
-    )
- 
-
-
-
-
-    
+    st.info(
+        "This is a hackathon prototype trained on "
+        "synthetic data. It is a decision-support estimate "
+        "and not an official flood warning."
+    )   
 # --------------------------------------------------
 # FLOOD IMAGE ANALYSIS
 # --------------------------------------------------
