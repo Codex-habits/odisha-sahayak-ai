@@ -470,7 +470,7 @@ st.info(
     "and displayed values are illustrative and are not "
     "live government disaster warnings."
     )
-)
+
  # --------------------------------------------------
 # FLOOD RISK ASSESSMENT
 # --------------------------------------------------
