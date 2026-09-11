@@ -894,6 +894,252 @@ if question:
             "Please provide more details such as your "
             "situation, location, or emergency."
         )
+# --------------------------------------------------
+# UNIFIED RISK INTELLIGENCE
+# --------------------------------------------------
+
+st.divider()
+
+st.header("🧠 Unified Risk Intelligence")
+
+st.write(
+    "A prototype decision-support score combining "
+    "flood prediction, AI vision analysis, and "
+    "emergency report classification."
+)
+
+# --------------------------------------------------
+# MODULE INPUTS
+# --------------------------------------------------
+
+risk_status = st.session_state.flood_risk_status
+risk_probability = st.session_state.flood_probability
+
+vision_status = st.session_state.vision_status
+
+emergency_status = st.session_state.emergency_status
+
+
+# --------------------------------------------------
+# CALCULATE PROTOTYPE RISK SCORE
+# --------------------------------------------------
+
+flood_score = min(
+    max(risk_probability, 0),
+    100
+)
+
+vision_score = 0
+
+if vision_status == "FLOOD DETECTED":
+    vision_score = 100
+
+elif vision_status == "NO FLOOD":
+    vision_score = 0
+
+else:
+    vision_score = 25
+
+
+emergency_score = 0
+
+if emergency_status == "CRITICAL":
+    emergency_score = 100
+
+elif emergency_status == "HIGH":
+    emergency_score = 75
+
+elif emergency_status == "MEDIUM":
+    emergency_score = 50
+
+elif emergency_status == "INFORMATION REQUIRED":
+    emergency_score = 25
+
+
+# --------------------------------------------------
+# WEIGHTED UNIFIED SCORE
+# --------------------------------------------------
+
+unified_score = (
+    0.50 * flood_score
+    + 0.25 * vision_score
+    + 0.25 * emergency_score
+)
+
+unified_score = round(
+    unified_score,
+    1
+)
+
+
+# --------------------------------------------------
+# RISK LEVEL
+# --------------------------------------------------
+
+if unified_score >= 75:
+
+    unified_level = "CRITICAL"
+
+elif unified_score >= 50:
+
+    unified_level = "HIGH"
+
+elif unified_score >= 25:
+
+    unified_level = "MODERATE"
+
+else:
+
+    unified_level = "LOW"
+
+
+# --------------------------------------------------
+# MAIN RISK DISPLAY
+# --------------------------------------------------
+
+score_col, level_col = st.columns(2)
+
+with score_col:
+
+    st.metric(
+        "🎯 Unified Risk Score",
+        f"{unified_score}/100"
+    )
+
+with level_col:
+
+    if unified_level == "CRITICAL":
+
+        st.error(
+            "🔴 CRITICAL"
+        )
+
+    elif unified_level == "HIGH":
+
+        st.warning(
+            "🟠 HIGH"
+        )
+
+    elif unified_level == "MODERATE":
+
+        st.warning(
+            "🟡 MODERATE"
+        )
+
+    else:
+
+        st.success(
+            "🟢 LOW"
+        )
+
+
+# --------------------------------------------------
+# MODULE CONTRIBUTIONS
+# --------------------------------------------------
+
+st.subheader("📊 AI Module Contributions")
+
+contribution_data = pd.DataFrame({
+    "AI Module": [
+        "🌊 Flood Risk Model",
+        "📷 Vision AI",
+        "🚨 Emergency Engine"
+    ],
+    "Current Signal": [
+        risk_status,
+        vision_status,
+        emergency_status
+    ],
+    "Prototype Score": [
+        round(flood_score, 1),
+        round(vision_score, 1),
+        round(emergency_score, 1)
+    ]
+})
+
+st.dataframe(
+    contribution_data,
+    use_container_width=True,
+    hide_index=True
+)
+
+
+# --------------------------------------------------
+# AI ASSESSMENT
+# --------------------------------------------------
+
+st.subheader("🧠 AI Situation Assessment")
+
+if unified_level == "CRITICAL":
+
+    st.error(
+        "Multiple high-priority signals are contributing "
+        "to the unified risk assessment. Immediate "
+        "human review and local authority verification "
+        "are recommended."
+    )
+
+elif unified_level == "HIGH":
+
+    st.warning(
+        "The combined AI signals indicate elevated risk. "
+        "The situation should receive increased monitoring "
+        "and human verification."
+    )
+
+elif unified_level == "MODERATE":
+
+    st.warning(
+        "The system detected moderate risk signals. "
+        "Continued monitoring and additional information "
+        "may improve the assessment."
+    )
+
+else:
+
+    st.success(
+        "The available prototype signals currently "
+        "indicate relatively low risk."
+    )
+
+
+# --------------------------------------------------
+# PRIORITY INDICATOR
+# --------------------------------------------------
+
+st.subheader("🚦 Monitoring Priority")
+
+if unified_level == "CRITICAL":
+
+    st.error(
+        "🔴 PRIORITY 1 — HIGH ATTENTION"
+    )
+
+elif unified_level == "HIGH":
+
+    st.warning(
+        "🟠 PRIORITY 2 — ENHANCED MONITORING"
+    )
+
+elif unified_level == "MODERATE":
+
+    st.warning(
+        "🟡 PRIORITY 3 — ROUTINE MONITORING"
+    )
+
+else:
+
+    st.success(
+        "🟢 PRIORITY 4 — NORMAL MONITORING"
+    )
+
+
+st.caption(
+    "Prototype unified risk score. It combines "
+    "demonstration outputs from the project's AI modules "
+    "and is not a calibrated probability, official warning, "
+    "or substitute for government disaster information."
+        )
 st.caption(
     "Odisha Sahayak AI — Hackathon Prototype | "
     "AI predictions are decision-support estimates, "
