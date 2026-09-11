@@ -33,6 +33,8 @@ if "vision_severity" not in st.session_state:
     st.session_state.vision_severity = "NONE"
 if "flood_probability" not in st.session_state:
     st.session_state.flood_probability = 0.0
+if "emergency_status" not in st.session_state:
+    st.session_state.emergency_status = "READY"    
 
 # -----------------------------
 # Header
@@ -205,10 +207,43 @@ with cmd2:
         )
 
 with cmd3:
-    st.metric(
-        "🚨 Emergency Engine",
-        "ONLINE"
-    )
+
+    emergency_status = st.session_state.emergency_status
+
+    if emergency_status == "CRITICAL":
+
+        st.metric(
+            "🚨 Emergency",
+            "🔴 CRITICAL"
+        )
+
+    elif emergency_status == "HIGH":
+
+        st.metric(
+            "🚨 Emergency",
+            "🟠 HIGH"
+        )
+
+    elif emergency_status == "MEDIUM":
+
+        st.metric(
+            "🚨 Emergency",
+            "🟡 MEDIUM"
+        )
+
+    elif emergency_status == "INFORMATION REQUIRED":
+
+        st.metric(
+            "🚨 Emergency",
+            "ℹ️ INFO NEEDED"
+        )
+
+    else:
+
+        st.metric(
+            "🚨 Emergency",
+            "🟢 READY"
+        )
 
 with cmd4:
     st.metric(
@@ -532,6 +567,7 @@ if question:
     if any(word in text for word in danger_words):
 
         st.error("🚨 CRITICAL PRIORITY — IMMEDIATE DANGER")
+        st.session_state.emergency_status = "CRITICAL"
 
         st.write("### 🛟 Recommended Actions")
         st.write("• Move to a safe location if possible.")
@@ -546,6 +582,7 @@ if question:
     elif any(word in text for word in medical_words):
 
         st.error("🔴 HIGH PRIORITY — MEDICAL EMERGENCY")
+        st.session_state.emergency_status = "HIGH"
 
         st.write("### 🛟 Recommended Actions")
         st.write("• Move to a safe location.")
@@ -560,6 +597,7 @@ if question:
     elif any(word in text for word in fire_words):
 
         st.error("🔴 HIGH PRIORITY — FIRE EMERGENCY")
+        st.session_state.emergency_status = "HIGH"
 
         st.write("### 🛟 Recommended Actions")
         st.write("• Move away from fire and smoke.")
@@ -574,6 +612,7 @@ if question:
     elif any(word in text for word in earthquake_words):
 
         st.error("🔴 HIGH PRIORITY — EARTHQUAKE")
+        st.session_state.emergency_status = "HIGH"
 
         st.write("### 🛟 Recommended Actions")
         st.write("• Move to a safe open area if possible.")
@@ -603,6 +642,7 @@ if question:
     elif any(word in text for word in flood_words):
 
         st.warning("🟠 MEDIUM PRIORITY — FLOOD / WATERLOGGING")
+        st.session_state.emergency_status = "MEDIUM"
 
         st.write("### 🛟 Recommended Actions")
         st.write("• Move to a safe or elevated location.")
@@ -617,6 +657,7 @@ if question:
     elif any(word in text for word in road_words):
 
         st.warning("🟠 MEDIUM PRIORITY — ROAD BLOCKAGE")
+        st.session_state.emergency_status = "MEDIUM"
 
         st.write("### 🛟 Recommended Actions")
         st.write("• Avoid the blocked route.")
@@ -631,6 +672,7 @@ if question:
     else:
 
         st.info("🟡 INFORMATION REQUIRED")
+        st.session_state.emergency_status = "INFORMATION REQUIRED"
 
         st.write(
             "Please provide more details such as your "
